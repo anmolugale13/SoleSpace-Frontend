@@ -1,0 +1,185 @@
+import { useEffect, useState } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { getProductBySlug, getRelated } from "../data/products";
+import PriceTag from "../components/PriceTag";
+import Rating from "../components/Rating";
+import ProductCard from "../components/ProductCard";
+import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
+import { useToast } from "../context/ToastContext";
+import { useRecentlyViewed } from "../context/RecentlyViewedContext";
+
+const TABS = ["Description", "Materials & Care", "Reviews"];
+
+export default function ProductDetail() {
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const product = getProductBySlug(slug);
+  const { addItem } = useCart();
+  const { isWishlisted, toggle } = useWishlist();
+  const { push } = useToast();
+  const { track } = useRecentlyViewed();
+
+  useEffect(() => {
+    if (product) track(product.id);
+  }, [product?.id]);
+
+  const [colorIdx, setColorIdx] = useState(0);
+  const [size, setSize] = useState(null);
+  const [activeImg, setActiveImg] = useState(0);
+  const [tab, setTab] = useState(0);
+  const [pin, setPin] = useState("");
+  const [pinResult, setPinResult] = useState(null);
+
+  if (!product) {
+    return (
+      <div className="container-x py-24 text-center">
+        <p className="font-display text-3xl mb-4">Product not found</p>
+        <Link to="/shop" className="btn-primary">Back to shop</Link>
+      </div>
+    );
+  }
+
+  const color = product.colors[colorIdx];
+  const inStock = size && color.stock[size] > 0;
+  const lowStock = size && color.stock[size] > 0 && color.stock[size] <= 3;
+
+  const handleAdd = (buyNow) => {
+    if (!size) { push("Pick a size first."); return; }
+    if (!inStock) { push("That size is out of stock."); return; }
+    addItem(product, color.name, size, 1);
+    push(`Added ${product.name} · ${color.name} · US ${size}`);
+    if (buyNow) navigate("/cart");
+  };
+
+  const checkPin = (e) => {
+    e.preventDefault();
+    if (pin.length !== 6) { setPinResult({ ok: false, msg: "Enter a valid 6-digit PIN code." }); return; }
+    setPinResult({ ok: true, msg: `Delivery available to ${pin}. Estimated 3–5 business days.` });
+  };
+
+  const related = getRelated(product);
+
+  return (
+    <div className="container-x py-8">
+      <nav className="font-mono text-xs text-graphite uppercase mb-6 flex gap-2 flex-wrap">
+        <Link to="/" className="hover:text-ink">Home</Link> /
+        <Link to={`/shop?category=${product.category}`} className="hover:text-ink capitalize">{product.category}</Link> /
+        <span className="text-ink">{product.name}</span>
+      </nav>
+
+      <div className="grid lg:grid-cols-2 gap-10">
+        {/* Gallery */}
+        <div>
+          <div className="aspect-square bg-haze overflow-hidden mb-3">
+            <img src={product.images[activeImg]} alt={`${product.name} view ${activeImg + 1}`} className="h-full w-full object-cover" />
+          </div>
+          <div className="flex gap-3">
+            {product.images.map((img, i) => (
+              <button key={img} onClick={() => setActiveImg(i)} className={`h-20 w-20 overflow-hidden border-2 ${i === activeImg ? "border-ink" : "border-transparent"}`}>
+                <img src={img} alt="" className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Info */}
+        <div>
+          {product.badges.length > 0 && (
+            <div className="flex gap-2 mb-3">
+              {product.badges.map((b) => <span key={b} className="stamp">{b}</span>)}
+            </div>
+          )}
+          <p className="label-eyebrow">{product.brand}</p>
+          <h1 className="font-display text-4xl mt-1">{product.name}</h1>
+          <div className="mt-2"><Rating value={product.rating} count={product.reviewCount} size="lg" /></div>
+          <div className="mt-4"><PriceTag price={product.price} mrp={product.mrp} size="lg" /></div>
+          <p className="text-xs text-graphite mt-1">MRP inclusive of all taxes.</p>
+
+          <div className="mt-6">
+            <p className="label-eyebrow mb-2">Color — {color.name}</p>
+            <div className="flex gap-2">
+              {product.colors.map((c, i) => (
+                <button key={c.name} onClick={() => { setColorIdx(i); setSize(null); }} className={`h-10 w-10 rounded-full border-2 ${i === colorIdx ? "border-ink" : "border-transparent"} ring-1 ring-ink/20`} style={{ backgroundColor: c.hex }} aria-label={c.name} />
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <div className="flex items-center justify-between mb-2">
+              <p className="label-eyebrow">Size (US) <Link to="/size-guide" className="stitch normal-case ml-2 text-ink">Size guide</Link></p>
+              {lowStock && <span className="text-cone text-xs font-mono">Only {color.stock[size]} left</span>}
+            </div>
+            <div className="grid grid-cols-5 sm:grid-cols-6 gap-2">
+              {color.sizes.map((s) => {
+                const disabled = color.stock[s] === 0;
+                return (
+                  <button
+                    key={s}
+                    disabled={disabled}
+                    onClick={() => setSize(s)}
+                    className={`h-11 font-mono text-sm border relative ${size === s ? "bg-ink text-white border-ink" : "border-ink/30 hover:border-ink"} ${disabled ? "opacity-30 cursor-not-allowed line-through" : ""}`}
+                  >
+                    {s}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-7 flex flex-col sm:flex-row gap-3">
+            <button onClick={() => handleAdd(false)} className="btn-primary flex-1">Add to cart</button>
+            <button onClick={() => handleAdd(true)} className="btn-accent flex-1">Buy now</button>
+            <button onClick={() => toggle(product.id)} aria-pressed={isWishlisted(product.id)} className="btn-outline !px-4" aria-label="Toggle wishlist">
+              {isWishlisted(product.id) ? "♥" : "♡"}
+            </button>
+          </div>
+
+          <form onSubmit={checkPin} className="mt-8 border border-ink/15 p-4">
+            <p className="label-eyebrow mb-2">Check delivery</p>
+            <div className="flex gap-2">
+              <input value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g,"").slice(0,6))} placeholder="PIN code" className="input" />
+              <button className="btn-outline shrink-0 !px-5">Check</button>
+            </div>
+            {pinResult && <p className={`mt-2 text-sm ${pinResult.ok ? "text-track" : "text-cone"}`}>{pinResult.msg}</p>}
+            <p className="text-xs text-graphite mt-2">Free returns &amp; exchanges within 30 days.</p>
+          </form>
+
+          <div className="mt-8 flex gap-2 border-b border-ink/10">
+            {TABS.map((t, i) => (
+              <button key={t} onClick={() => setTab(i)} className={`px-3 py-2.5 text-sm font-medium ${tab === i ? "border-b-2 border-ink text-ink" : "text-graphite"}`}>{t}</button>
+            ))}
+          </div>
+          <div className="py-5 text-sm text-graphite leading-relaxed">
+            {tab === 0 && <p>{product.description}</p>}
+            {tab === 1 && (
+              <ul className="space-y-1.5">
+                <li><strong className="text-ink">Upper:</strong> {product.material}</li>
+                <li><strong className="text-ink">Activity:</strong> {product.activity}</li>
+                <li><strong className="text-ink">Care:</strong> Wipe with a damp cloth. Air dry away from direct heat.</li>
+              </ul>
+            )}
+            {tab === 2 && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <Rating value={product.rating} size="lg" />
+                  <span className="font-mono text-sm">{product.rating} out of 5 · {product.reviewCount} reviews</span>
+                </div>
+                <p className="text-xs">Only customers with a verified purchase can leave a review.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {related.length > 0 && (
+        <section className="mt-20">
+          <h2 className="font-display text-3xl mb-6">You might also like</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
+            {related.map((p) => <ProductCard key={p.id} product={p} />)}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
