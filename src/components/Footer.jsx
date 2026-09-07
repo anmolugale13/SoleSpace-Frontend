@@ -16,8 +16,8 @@ const icons = {
 
 export default function Footer() {
   return (
-    <footer className="mt-20">
-      <div className="bg-haze">
+    <footer className="mt-8">
+      <div className="bg-track-light">
         <div className="container-x grid grid-cols-2 md:grid-cols-4 gap-6 py-10">
           {trust.map((t) => (
             <div key={t.title} className="flex items-center gap-3">
@@ -25,8 +25,8 @@ export default function Footer() {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">{icons[t.icon]}</svg>
               </span>
               <div>
-                <p className="text-sm font-bold leading-tight">{t.title}</p>
-                <p className="text-xs text-graphite">{t.desc}</p>
+                <p className="text-sm font-bold leading-tight text-white">{t.title}</p>
+                <p className="text-xs text-white/70">{t.desc}</p>
               </div>
             </div>
           ))}
