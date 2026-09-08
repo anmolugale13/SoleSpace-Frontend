@@ -17,7 +17,7 @@ const icons = {
 export default function Footer() {
   return (
     <footer className="mt-8">
-      <div className="bg-track-light">
+      <div className="bg-[#778899] mb-1">
         <div className="container-x grid grid-cols-2 md:grid-cols-4 gap-6 py-10">
           {trust.map((t) => (
             <div key={t.title} className="flex items-center gap-3">
@@ -80,7 +80,7 @@ export default function Footer() {
         </div>
         <div className="border-t border-white/10">
           <div className="container-x py-5 text-center text-xs text-white/40">
-            © {new Date().getFullYear()} SoleSpace. Frontend demo build — React.js · Tailwind CSS.
+            © {new Date().getFullYear()} SoleSpace.
           </div>
         </div>
       </div>
