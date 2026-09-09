@@ -53,12 +53,35 @@ export default function ProductDetail() {
   };
 
   const checkPin = (e) => {
-    e.preventDefault();
-    if (pin.length !== 6) { setPinResult({ ok: false, msg: "Enter a valid 6-digit PIN code." }); return; }
-    setPinResult({ ok: true, msg: `Delivery available to ${pin}. Estimated 3–5 business days.` });
-  };
+  e.preventDefault();
+  if (pin.length !== 6) {
+    setPinResult({ ok: false, msg: "Enter a valid 6-digit PIN code." });
+    return;
+  }
+  setPinResult({
+    ok: true,
+    msg: `Delivery available to ${pin}. Estimated 3–5 business days.`,
+  });
+};
 
-  const related = getRelated(product);
+const handleShare = async () => {
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title: product.name,
+        text: `Check out ${product.name}`,
+        url: window.location.href,
+      });
+    } else {
+      await navigator.clipboard.writeText(window.location.href);
+      push("Product link copied to clipboard!");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const related = getRelated(product);
 
   return (
     <div className="container-x py-8">
@@ -127,13 +150,33 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          <div className="mt-7 flex flex-col sm:flex-row gap-3">
-            <button onClick={() => handleAdd(false)} className="btn-primary flex-1">Add to cart</button>
-            <button onClick={() => handleAdd(true)} className="btn-accent flex-1">Buy now</button>
-            <button onClick={() => toggle(product.id)} aria-pressed={isWishlisted(product.id)} className="btn-outline !px-4" aria-label="Toggle wishlist">
-              {isWishlisted(product.id) ? "♥" : "♡"}
-            </button>
-          </div>
+       <div className="mt-7 flex flex-col sm:flex-row gap-3">
+  <button onClick={() => handleAdd(false)} className="btn-primary flex-1">
+    Add to cart
+  </button>
+
+  <button onClick={() => handleAdd(true)} className="btn-accent flex-1">
+    Buy now
+  </button>
+
+  <button
+    onClick={() => toggle(product.id)}
+    aria-pressed={isWishlisted(product.id)}
+    className="btn-outline !px-4"
+    aria-label="Toggle wishlist"
+  >
+    {isWishlisted(product.id) ? "♥" : "♡"}
+  </button>
+
+  <button
+    onClick={handleShare}
+    className="btn-outline !px-4"
+  >
+    Share
+  </button>
+</div>
+
+
 
           <form onSubmit={checkPin} className="mt-8 border border-ink/15 p-4">
             <p className="label-eyebrow mb-2">Check delivery</p>
@@ -160,14 +203,65 @@ export default function ProductDetail() {
               </ul>
             )}
             {tab === 2 && (
-              <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <Rating value={product.rating} size="lg" />
-                  <span className="font-mono text-sm">{product.rating} out of 5 · {product.reviewCount} reviews</span>
-                </div>
-                <p className="text-xs">Only customers with a verified purchase can leave a review.</p>
-              </div>
-            )}
+  <div>
+    <div className="flex items-center gap-3 mb-6">
+      <Rating value={product.rating} size="lg" />
+      <span className="font-mono text-sm">
+        {product.rating} out of 5 · {product.reviewCount} reviews
+      </span>
+    </div>
+
+    <h4 className="font-semibold mb-4">
+      Ratings Breakdown
+    </h4>
+
+    <div className="space-y-3">
+      <div className="flex items-center gap-3">
+        <span className="w-10 text-sm">5★</span>
+        <div className="flex-1 h-2 bg-gray-200 rounded">
+          <div className="h-2 bg-yellow-400 rounded w-[78%]"></div>
+        </div>
+        <span className="text-xs w-10">78%</span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className="w-10 text-sm">4★</span>
+        <div className="flex-1 h-2 bg-gray-200 rounded">
+          <div className="h-2 bg-yellow-400 rounded w-[15%]"></div>
+        </div>
+        <span className="text-xs w-10">15%</span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className="w-10 text-sm">3★</span>
+        <div className="flex-1 h-2 bg-gray-200 rounded">
+          <div className="h-2 bg-yellow-400 rounded w-[4%]"></div>
+        </div>
+        <span className="text-xs w-10">4%</span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className="w-10 text-sm">2★</span>
+        <div className="flex-1 h-2 bg-gray-200 rounded">
+          <div className="h-2 bg-yellow-400 rounded w-[2%]"></div>
+        </div>
+        <span className="text-xs w-10">2%</span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className="w-10 text-sm">1★</span>
+        <div className="flex-1 h-2 bg-gray-200 rounded">
+          <div className="h-2 bg-yellow-400 rounded w-[1%]"></div>
+        </div>
+        <span className="text-xs w-10">1%</span>
+      </div>
+    </div>
+
+    <p className="text-xs mt-5">
+      Only customers with a verified purchase can leave a review.
+    </p>
+  </div>
+)}
           </div>
         </div>
       </div>
