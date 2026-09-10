@@ -4,6 +4,7 @@ import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useAuth } from "../context/AuthContext";
 import { categories, brands } from "../data/products";
+import MiniCart from "./MiniCart";
 
 const fmt = (n) => `₹${n.toLocaleString("en-IN")}`;
 
@@ -90,21 +91,27 @@ export default function Navbar() {
                 <span className="absolute top-0.5 right-0.5 bg-traction text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full">{ids.length}</span>
               )}
             </Link>
-            <Link to="/cart" className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-haze transition-colors relative">
-              <span className="relative">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="9" cy="20" r="1.5" /><circle cx="18" cy="20" r="1.5" />
-                  <path d="M3 4h2l2.4 12.2a2 2 0 002 1.8h7.2a2 2 0 002-1.7L20 8H6" />
-                </svg>
-                {itemCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-traction text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full">{itemCount}</span>
-                )}
-              </span>
-              <span className="hidden sm:flex flex-col leading-tight text-left">
-                <span className="text-[10px] text-graphite uppercase">Cart</span>
-                <span className="text-xs font-bold">{fmt(subtotal)}</span>
-              </span>
-            </Link>
+            <div className="group relative">
+              <Link to="/cart" className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-haze transition-colors relative">
+                <span className="relative">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="9" cy="20" r="1.5" /><circle cx="18" cy="20" r="1.5" />
+                    <path d="M3 4h2l2.4 12.2a2 2 0 002 1.8h7.2a2 2 0 002-1.7L20 8H6" />
+                  </svg>
+                  {itemCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-traction text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full">{itemCount}</span>
+                  )}
+                </span>
+                <span className="hidden sm:flex flex-col leading-tight text-left">
+                  <span className="text-[10px] text-graphite uppercase">Cart</span>
+                  <span className="text-xs font-bold">{fmt(subtotal)}</span>
+                </span>
+              </Link>
+              {/* Mini-cart preview: hover on desktop, tap the cart link itself on touch devices */}
+              <div className="hidden md:block invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity absolute top-full right-0 pt-2 z-30">
+                <MiniCart />
+              </div>
+            </div>
           </div>
         </div>
 

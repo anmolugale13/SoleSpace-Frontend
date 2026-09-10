@@ -163,7 +163,7 @@ export default function Checkout() {
               {cart.items.map((item) => (
                 <div key={item.key} className="py-3 flex justify-between text-sm">
                   <span>{item.name} · {item.color} · US {item.size} × {item.qty}</span>
-                  <span className="font-mono">{fmt(item.price * item.qty)}</span>
+                  <span className="font-mono">{fmt(item.currentPrice * item.qty)}</span>
                 </div>
               ))}
             </div>
