@@ -223,21 +223,13 @@ function Orders() {
 }
 
 /* ---------- Addresses ---------- */
-
-function Addresses() {
-  const [addresses, setAddresses] = useState([
-    {
-      id: 1,
-      label: "Home",
-      name: "Alex Rivera",
-      line1: "24 Harbor View Lane",
-      city: "Pune",
-      state: "MH",
-      pin: "411001",
-      isDefault: true,
-    },
-  ]);
+ function Addresses() {
+  const { user, token } = useAuth();
+  const { push } = useToast();
+  
+  const [addresses, setAddresses] = useState(user.addresses || []);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     label: "Home",
     name: "",
@@ -247,14 +239,50 @@ function Addresses() {
     pin: "",
   });
 
-  const add = (e) => {
+  const add = async (e) => {
     e.preventDefault();
-    setAddresses((prev) => [
-      ...prev,
-      { ...form, id: Date.now(), isDefault: prev.length === 0 },
-    ]);
-    setForm({ label: "Home", name: "", line1: "", city: "", state: "", pin: "" });
-    setShowForm(false);
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/address", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to add address");
+
+      setAddresses(data.addresses);
+      setForm({ label: "Home", name: "", line1: "", city: "", state: "", pin: "" });
+      setShowForm(false);
+      push("Address saved successfully");
+    } catch (err) {
+      push(err.message || "Error saving address");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeAddress = async (addressId) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/auth/address/${addressId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to delete address");
+
+      setAddresses(data.addresses);
+      push("Address removed");
+    } catch (err) {
+      push(err.message || "Error removing address");
+    }
   };
 
   return (
@@ -262,7 +290,7 @@ function Addresses() {
       <div className="space-y-4 mb-6">
         {addresses.map((a) => (
           <div
-            key={a.id}
+            key={a._id || a.id}
             className="rounded-2xl border border-gray-200 bg-white p-6 flex justify-between items-start gap-4"
           >
             <div>
@@ -281,9 +309,7 @@ function Addresses() {
               </p>
             </div>
             <button
-              onClick={() =>
-                setAddresses((prev) => prev.filter((x) => x.id !== a.id))
-              }
+              onClick={() => removeAddress(a._id || a.id)}
               className="text-gray-400 hover:text-rose-500 text-sm font-medium transition"
             >
               Remove
@@ -349,7 +375,9 @@ function Addresses() {
             >
               Cancel
             </button>
-            <button className="btn-primary flex-1 rounded-xl">Save address</button>
+            <button disabled={loading} className="btn-primary flex-1 rounded-xl">
+              {loading ? "Saving..." : "Save address"}
+            </button>
           </div>
         </form>
       )}
