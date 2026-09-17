@@ -1,11 +1,21 @@
  import express from 'express';
-import { registerUser, loginUser, updateProfile } from '../controllers/authController.js';
-import { protect } from '../middleware/authMiddleware.js'; // 👈 Make sure this import is here
+import { 
+  registerUser, 
+  loginUser, 
+  updateProfile, 
+  addAddress, 
+  deleteAddress 
+} from '../controllers/authController.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.put('/profile', protect, updateProfile); // Now 'protect' is defined!
+
+// Protected routes matching your frontend calls
+router.put('/profile', protect, updateProfile);
+router.post('/address', protect, addAddress);
+router.delete('/address/:addressId', protect, deleteAddress);
 
 export default router;

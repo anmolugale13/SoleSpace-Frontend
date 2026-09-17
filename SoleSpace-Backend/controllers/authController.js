@@ -64,30 +64,76 @@ import jwt from 'jsonwebtoken';
   }
 };
 
-
-
-// Update user profile / settings
+// Update Profile & Notifications
 export const updateProfile = async (req, res) => {
   try {
-    const userId = req.user.id; // Assumes your auth middleware attaches decoded user token to req.user
+    const userId = req.user.id;
     const { name, notifications } = req.body;
 
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { 
-        ...(name && { name }),
-        ...(notifications && { notifications })
-      },
-      { new: true, runValidators: true }
-    ).select('-password'); // Exclude password from response
-
-    if (!updatedUser) {
+    const user = await User.findById(userId);
+    if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    if (name) user.name = name;
+    if (notifications) user.notifications = notifications;
+
+    const updatedUser = await user.save();
+
     res.status(200).json({
       message: 'Profile updated successfully',
-      user: updatedUser
+      user: {
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        loyaltyPoints: updatedUser.loyaltyPoints,
+        addresses: updatedUser.addresses,
+        notifications: updatedUser.notifications
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Add Address
+export const addAddress = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { label, name, line1, city, state, pin } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const isDefault = user.addresses.length === 0;
+
+    user.addresses.push({ label, name, line1, city, state, pin, isDefault });
+    await user.save();
+
+    res.status(200).json({
+      message: 'Address added successfully',
+      addresses: user.addresses
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Delete Address
+export const deleteAddress = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { addressId } = req.params;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.addresses = user.addresses.filter((addr) => addr._id.toString() !== addressId);
+    await user.save();
+
+    res.status(200).json({
+      message: 'Address removed successfully',
+      addresses: user.addresses
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
