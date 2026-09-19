@@ -35,16 +35,50 @@ export default function Checkout() {
   const next = (e) => { e.preventDefault(); setStep((s) => Math.min(4, s + 1)); };
   const back = () => setStep((s) => Math.max(1, s - 1));
 
-  const placeOrder = () => {
+ const placeOrder = async () => {
     setPlacing(true);
-    setTimeout(() => {
-      const id = "SS" + Math.floor(100000 + Math.random() * 899999);
-      setOrderId(id);
-      cart.clearCart();
-      setPlacing(false);
-    }, 900);
-  };
+    try {
+      const orderData = {
+        orderItems: cart.items.map(item => ({
+          name: item.name || "Shoe Item",
+          qty: item.qty || 1,
+          image: item.image || "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
+          price: item.currentPrice || item.price || 0,
+          sku: item.sku || "SS-SKU"
+        })),
+        shippingAddress: {
+          address: address.line1 || "Not Provided",
+          city: address.city || "Not Provided",
+          postalCode: address.pin || "000000",
+          country: "India"
+        },
+        totalPrice: grandTotal
+      };
 
+      const response = await fetch('http://localhost:5000/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to save order to database');
+      }
+
+      setOrderId(data._id);
+      cart.clearCart();
+    } catch (error) {
+      console.error("Error placing order:", error);
+      alert("Error saving order: " + error.message);
+    } finally {
+      setPlacing(false);
+    }
+  };
+  
   if (orderId) {
     return (
       <div className="container-x py-24 text-center max-w-lg mx-auto">
