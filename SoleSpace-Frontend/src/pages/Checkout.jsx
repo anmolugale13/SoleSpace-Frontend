@@ -1,4 +1,4 @@
-import { useState } from "react";
+ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -9,7 +9,7 @@ const STEPS = ["Contact", "Delivery", "Payment", "Review"];
 
 export default function Checkout() {
   const cart = useCart();
-  const { user } = useAuth();
+  const { user, token } = useAuth(); // <--- Added token here
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [placing, setPlacing] = useState(false);
@@ -35,7 +35,7 @@ export default function Checkout() {
   const next = (e) => { e.preventDefault(); setStep((s) => Math.min(4, s + 1)); };
   const back = () => setStep((s) => Math.max(1, s - 1));
 
- const placeOrder = async () => {
+  const placeOrder = async () => {
     setPlacing(true);
     try {
       const orderData = {
@@ -59,6 +59,7 @@ export default function Checkout() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // <--- Added Authorization header with token
         },
         body: JSON.stringify(orderData)
       });

@@ -526,80 +526,88 @@ function Settings() {
 
 /* ---------- Layout ---------- */
 
+ /* ---------- Layout ---------- */
+
 export default function Account() {
-  const { user } = useAuth();
-  const [orders, setOrders] = useState([]);
+  const { user, token } = useAuth(); // <--- Added token here
+  const [orders, setOrders] = useState([]);
 
-  // Fetch orders from backend when account page mounts
-  useEffect(() => {
-    fetch('http://localhost:5000/api/orders')
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setOrders(data);
-        }
-      })
-      .catch((err) => console.error("Failed to fetch user orders:", err));
-  }, []);
+  // Fetch orders from backend when account page mounts
+  useEffect(() => {
+    if (!token) return; // Wait until token is available
 
-  const initials = (user.name || "?")
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((n) => n[0]?.toUpperCase())
-    .join("");
+    fetch('http://localhost:5000/api/orders', {
+      headers: {
+        'Authorization': `Bearer ${token}` // <--- Added Authorization header
+      }
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setOrders(data);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch user orders:", err));
+  }, [token]);
 
-  const tabs = [
-    { to: "", label: "Overview", icon: IconGrid, el: <Overview orders={orders} /> },
-    { to: "orders", label: "Orders", icon: IconPackage, el: <Orders orders={orders} /> },
-    { to: "addresses", label: "Addresses", icon: IconPin, el: <Addresses /> },
-    { to: "settings", label: "Settings", icon: IconSliders, el: <Settings /> },
-  ];
+  const initials = (user.name || "?")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n) => n[0]?.toUpperCase())
+    .join("");
 
-  return (
-    <div className="container-x py-10">
-      <div className="flex items-center gap-4 mb-10">
-        <div className="h-12 w-12 shrink-0 rounded-full bg-ink text-white flex items-center justify-center font-display text-lg">
-          {initials}
-        </div>
-        <div>
-          <p className="label-eyebrow text-gray-500 mb-0.5">Hi, {user.name}</p>
-          <h1 className="font-display text-3xl text-ink">My Account</h1>
-        </div>
-      </div>
+  const tabs = [
+    { to: "", label: "Overview", icon: IconGrid, el: <Overview orders={orders} /> },
+    { to: "orders", label: "Orders", icon: IconPackage, el: <Orders orders={orders} /> },
+    { to: "addresses", label: "Addresses", icon: IconPin, el: <Addresses /> },
+    { to: "settings", label: "Settings", icon: IconSliders, el: <Settings /> },
+  ];
 
-      <div className="flex flex-col md:flex-row gap-10">
-        {/* Sidebar Navigation */}
-        <nav className="md:w-52 shrink-0 flex md:flex-col gap-1 overflow-x-auto pb-2 md:pb-0 border-b md:border-b-0 md:border-r border-gray-100 md:pr-6">
-          {tabs.map((t) => {
-            const Icon = t.icon;
-            return (
-              <NavLink
-                key={t.label}
-                to={`/account/${t.to}`}
-                end={t.to === ""}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 font-mono text-xs uppercase tracking-wider px-3 py-2.5 rounded-lg whitespace-nowrap transition ${
-                    isActive ? "bg-ink text-white" : "text-gray-500 hover:bg-haze hover:text-ink"
-                  }`
-                }
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                {t.label}
-              </NavLink>
-            );
-          })}
-        </nav>
+  return (
+    <div className="container-x py-10">
+      <div className="flex items-center gap-4 mb-10">
+        <div className="h-12 w-12 shrink-0 rounded-full bg-ink text-white flex items-center justify-center font-display text-lg">
+          {initials}
+        </div>
+        <div>
+          <p className="label-eyebrow text-gray-500 mb-0.5">Hi, {user.name}</p>
+          <h1 className="font-display text-3xl text-ink">My Account</h1>
+        </div>
+      </div>
 
-        {/* Content Area */}
-        <div className="flex-1 min-w-0">
-          <Routes>
-            {tabs.map((t) => (
-              <Route key={t.label} path={t.to === "" ? "" : t.to} element={t.el} />
-            ))}
-          </Routes>
-        </div>
-      </div>
-    </div>
-  );
+      <div className="flex flex-col md:flex-row gap-10">
+        {/* Sidebar Navigation */}
+        <nav className="md:w-52 shrink-0 flex md:flex-col gap-1 overflow-x-auto pb-2 md:pb-0 border-b md:border-b-0 md:border-r border-gray-100 md:pr-6">
+          {tabs.map((t) => {
+            const Icon = t.icon;
+            return (
+              <NavLink
+                key={t.label}
+                to={`/account/${t.to}`}
+                end={t.to === ""}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 font-mono text-xs uppercase tracking-wider px-3 py-2.5 rounded-lg whitespace-nowrap transition ${
+                    isActive ? "bg-ink text-white" : "text-gray-500 hover:bg-haze hover:text-ink"
+                  }`
+                }
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                {t.label}
+              </NavLink>
+            );
+          })}
+        </nav>
+
+        {/* Content Area */}
+        <div className="flex-1 min-w-0">
+          <Routes>
+            {tabs.map((t) => (
+              <Route key={t.label} path={t.to === "" ? "" : t.to} element={t.el} />
+            ))}
+          </Routes>
+        </div>
+      </div>
+    </div>
+  );
 }
