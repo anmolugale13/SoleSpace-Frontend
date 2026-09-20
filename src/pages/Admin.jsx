@@ -20,11 +20,15 @@ function Dashboard() {
   const lowStock = initialProducts.filter((p) => p.colors.some((c) => c.sizes.some((s) => c.stock[s] > 0 && c.stock[s] <= 3))).length;
   return (
     <div className="space-y-8">
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Kpi label="Gross sales (30d)" value={fmt(grossSales)} />
         <Kpi label="Orders" value={mockOrders.length + 128} />
         <Kpi label="Avg. order value" value={fmt(Math.round(grossSales / 40))} />
         <Kpi label="Low-stock SKUs" value={lowStock} accent />
+        <Kpi label="Units Sold" value="542" />
+        <Kpi label="Top Brand" value="Aeropace" />
+        <Kpi label="Out of Stock" value="12" accent />
       </div>
       <div className="border border-ink/15 p-5">
         <p className="font-display text-lg mb-4">Sales by category (30 days)</p>
@@ -39,6 +43,7 @@ function Dashboard() {
           ))}
         </div>
       </div>
+      
       <div className="border border-ink/15 p-5">
         <p className="font-display text-lg mb-4">Recent orders</p>
         <table className="w-full text-sm">
@@ -55,6 +60,23 @@ function Dashboard() {
           </tbody>
         </table>
       </div>
+      <div className="border border-ink/15 p-5">
+  <p className="font-display text-lg mb-4">
+    Coupon Performance
+  </p>
+
+  <div className="space-y-3">
+    <div className="flex justify-between">
+      <span>WELCOME10</span>
+      <span className="font-mono">312 uses</span>
+    </div>
+
+    <div className="flex justify-between">
+      <span>FREESHIP</span>
+      <span className="font-mono">89 uses</span>
+    </div>
+  </div>
+</div>
     </div>
   );
 }
