@@ -7,11 +7,16 @@ import {
   deleteAddress 
 } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
+import { googleLogin } from '../controllers/googleAuthController.js';
 
 const router = express.Router();
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
+
+// Google Login
+router.post('/google', googleLogin);
+
 
 // Protected routes matching your frontend calls
 router.put('/profile', protect, updateProfile);
