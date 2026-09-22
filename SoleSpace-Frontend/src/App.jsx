@@ -20,6 +20,8 @@ import { AuthProvider } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
 import { RecentlyViewedProvider } from "./context/RecentlyViewedContext";
 
+import ForgotPassword from "./pages/ForgotPassword";
+
 export default function App() {
   return (
     <AuthProvider>
@@ -63,6 +65,9 @@ export default function App() {
                   <Route path="/privacy" element={<Privacy />} />
                   <Route path="/terms" element={<Terms />} />
                   <Route path="*" element={<NotFound />} />
+
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  
                 </Route>
               </Routes>
             </BrowserRouter>

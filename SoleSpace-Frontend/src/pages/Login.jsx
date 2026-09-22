@@ -1,10 +1,11 @@
- import { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import { useEffect } from "react";
 
 export default function Login() {
-  const { user, login, logout } = useAuth();
+  const { user, login, googleLogin, logout } = useAuth();
   const navigate = useNavigate();
   const { push } = useToast();
 
@@ -20,6 +21,59 @@ export default function Login() {
     } else {
       push(result.message || "Login failed");
     }
+  };
+
+  // Google login handler
+
+
+  // Google login handler
+  useEffect(() => {
+    const initializeGoogle = () => {
+      if (!window.google) return;
+
+      window.google.accounts.id.initialize({
+        client_id:
+          "177260318618-meoon79oknra9vs08rvoeq6us3226evk.apps.googleusercontent.com",
+
+        callback: async (response) => {
+          try {
+            const result = await googleLogin(response.credential);
+
+            if (!result.ok) {
+              throw new Error(result.message || "Google login failed");
+            }
+
+            push("Logged in successfully with Google");
+            navigate("/account");
+          } catch (error) {
+            console.error("Google Login Error:", error);
+            push(error.message || "Google login failed");
+          }
+        },
+      });
+    };
+
+    if (window.google) {
+      initializeGoogle();
+    } else {
+      const timer = setInterval(() => {
+        if (window.google) {
+          clearInterval(timer);
+          initializeGoogle();
+        }
+      }, 100);
+
+      return () => clearInterval(timer);
+    }
+  }, [navigate, push, googleLogin]);
+
+  const handleGoogleLogin = () => {
+    if (!window.google) {
+      push("Google login is not ready. Please try again.");
+      return;
+    }
+
+    window.google.accounts.id.prompt();
   };
 
   const handleLogout = () => {
@@ -130,7 +184,7 @@ export default function Login() {
 
                 {/* Google Login */}
                 <button
-                  type="button"
+                  type="button" onClick={handleGoogleLogin}
                   className="w-full border border-gray-300 rounded-xl py-3 px-4 flex items-center justify-center gap-3 hover:bg-gray-50 transition"
                 >
                   <svg width="20" height="20" viewBox="0 0 48 48">
@@ -191,6 +245,7 @@ export default function Login() {
                 >
                   Go to Account Page
                 </button>
+
                 <button
                   type="button"
                   onClick={handleLogout}

@@ -80,8 +80,43 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(TOKEN_KEY);
   };
 
+  // Google Login
+
+  const googleLogin = async (credential) => {
+  try {
+    const response = await fetch("http://localhost:5000/api/auth/google", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ credential }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Google login failed");
+    }
+
+    setToken(data.token);
+    setUser(data.user);
+
+    return {
+      ok: true,
+      message: data.message,
+    };
+  } catch (error) {
+    console.error("Google login error:", error);
+
+    return {
+      ok: false,
+      message: error.message,
+    };
+  }
+};
+
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, token, login, register, googleLogin, logout, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );
