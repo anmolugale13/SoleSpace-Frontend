@@ -3,83 +3,9 @@ import { NavLink, Route, Routes } from "react-router-dom";
 import { products as initialProducts } from "../data/products";
 import { mockOrders } from "../data/mockOrders";
 import { useToast } from "../context/ToastContext";
+import Dashboard from "./admin/Dashboard";
 
 const fmt = (n) => `₹${n.toLocaleString("en-IN")}`;
-
-function Kpi({ label, value, accent }) {
-  return (
-    <div className="border border-ink/15 p-5">
-      <p className="label-eyebrow mb-2">{label}</p>
-      <p className={`font-display text-3xl ${accent ? "text-cone" : ""}`}>{value}</p>
-    </div>
-  );
-}
-
-function Dashboard() {
-  const grossSales = initialProducts.reduce((s, p) => s + p.price * 3, 0);
-  const lowStock = initialProducts.filter((p) => p.colors.some((c) => c.sizes.some((s) => c.stock[s] > 0 && c.stock[s] <= 3))).length;
-  return (
-    <div className="space-y-8">
-      
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Kpi label="Gross sales (30d)" value={fmt(grossSales)} />
-        <Kpi label="Orders" value={mockOrders.length + 128} />
-        <Kpi label="Avg. order value" value={fmt(Math.round(grossSales / 40))} />
-        <Kpi label="Low-stock SKUs" value={lowStock} accent />
-        <Kpi label="Units Sold" value="542" />
-        <Kpi label="Top Brand" value="Aeropace" />
-        <Kpi label="Out of Stock" value="12" accent />
-      </div>
-      <div className="border border-ink/15 p-5">
-        <p className="font-display text-lg mb-4">Sales by category (30 days)</p>
-        <div className="space-y-3">
-          {["Running","Sneakers","Basketball","Formal","Boots","Sandals"].map((c, i) => (
-            <div key={c} className="flex items-center gap-3">
-              <span className="w-24 text-xs font-mono uppercase shrink-0">{c}</span>
-              <div className="flex-1 bg-haze h-4">
-                <div className="h-4 bg-track" style={{ width: `${90 - i * 12}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      <div className="border border-ink/15 p-5">
-        <p className="font-display text-lg mb-4">Recent orders</p>
-        <table className="w-full text-sm">
-          <thead><tr className="text-left label-eyebrow border-b border-ink/10"><th className="pb-2">Order</th><th className="pb-2">Date</th><th className="pb-2">Status</th><th className="pb-2 text-right">Total</th></tr></thead>
-          <tbody className="divide-y divide-ink/5">
-            {mockOrders.map((o) => (
-              <tr key={o.id}>
-                <td className="py-2.5 font-mono">{o.id}</td>
-                <td className="py-2.5 text-graphite">{o.date}</td>
-                <td className="py-2.5"><span className="stamp">{o.status}</span></td>
-                <td className="py-2.5 text-right font-mono">{fmt(o.total)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="border border-ink/15 p-5">
-  <p className="font-display text-lg mb-4">
-    Coupon Performance
-  </p>
-
-  <div className="space-y-3">
-    <div className="flex justify-between">
-      <span>WELCOME10</span>
-      <span className="font-mono">312 uses</span>
-    </div>
-
-    <div className="flex justify-between">
-      <span>FREESHIP</span>
-      <span className="font-mono">89 uses</span>
-    </div>
-  </div>
-</div>
-    </div>
-  );
-}
 
 function ProductsAdmin() {
   const [rows, setRows] = useState(initialProducts.map((p) => ({ ...p, published: true })));
