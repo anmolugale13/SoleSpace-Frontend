@@ -5,6 +5,8 @@ import cors from 'cors';
 import authRoutes from './routes/authRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import forgotPasswordRoutes from './routes/forgotPasswordRoutes.js';
+import productRoutes from "./routes/productRoutes.js";
+import customerRoutes from "./routes/customerRoutes.js";
 
 dotenv.config();
 
@@ -18,6 +20,8 @@ app.use(cors());
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/forgot-password', forgotPasswordRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/customers", customerRoutes);
 
 const PORT = process.env.PORT || 5000;
 
