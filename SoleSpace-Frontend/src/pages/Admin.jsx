@@ -3,6 +3,7 @@ import { NavLink, Route, Routes } from "react-router-dom";
 import { products as initialProducts } from "../data/products";
 import { mockOrders } from "../data/mockOrders";
 import { useToast } from "../context/ToastContext";
+import OrdersAdmin from "../components/admin/OrdersAdmin";
 
 const fmt = (n) => `₹${n.toLocaleString("en-IN")}`;
 
@@ -100,37 +101,7 @@ function ProductsAdmin() {
   );
 }
 
-function OrdersAdmin() {
-  const { push } = useToast();
-  const [statusMap, setStatusMap] = useState(Object.fromEntries(mockOrders.map((o) => [o.id, o.status])));
-  const cycle = { Processing: "Shipped", Shipped: "Delivered", Delivered: "Delivered", "Return Requested": "Returned", Returned: "Returned" };
-  return (
-    <div className="overflow-x-auto border border-ink/15">
-      <table className="w-full text-sm min-w-[640px]">
-        <thead className="bg-haze"><tr className="text-left label-eyebrow"><th className="p-3">Order</th><th className="p-3">Date</th><th className="p-3">Items</th><th className="p-3">Total</th><th className="p-3">Status</th><th className="p-3"></th></tr></thead>
-        <tbody className="divide-y divide-ink/10">
-          {mockOrders.map((o) => (
-            <tr key={o.id}>
-              <td className="p-3 font-mono">{o.id}</td>
-              <td className="p-3 text-graphite">{o.date}</td>
-              <td className="p-3">{o.items.length}</td>
-              <td className="p-3 font-mono">{fmt(o.total)}</td>
-              <td className="p-3"><span className="stamp">{statusMap[o.id]}</span></td>
-              <td className="p-3 text-right">
-                <button
-                  onClick={() => { setStatusMap((s) => ({ ...s, [o.id]: cycle[s[o.id]] })); push(`Order ${o.id} updated`); }}
-                  className="stitch text-xs"
-                >
-                  Advance status
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
+// OrdersAdmin moved to src/components/admin/OrdersAdmin.jsx
 
 function CouponsAdmin() {
   const coupons = [
