@@ -73,16 +73,27 @@ export const updateProduct = async(req, res) => {
                 message: "Product not found"
             });
         }
-        const { name, description, brand, category, variants, sku, mrp, sellingPrice, costPrice } = req.body;
-        product.name = name,
-        product.description = description,
-        product.brand = brand,
-        product.category = category,
-        product.variants = variants,
-        product.sku = sku,
-        product.mrp = mrp,
-        product.sellingPrice = sellingPrice,
-        product.costPrice = costPrice
+        const {
+    name,
+    description,
+    brand,
+    category,
+    variants,
+    sku,
+    mrp,
+    sellingPrice,
+    costPrice
+} = req.body;
+
+if (name !== undefined) product.name = name;
+if (description !== undefined) product.description = description;
+if (brand !== undefined) product.brand = brand;
+if (category !== undefined) product.category = category;
+if (variants !== undefined) product.variants = variants;
+if (sku !== undefined) product.sku = sku;
+if (mrp !== undefined) product.mrp = mrp;
+if (sellingPrice !== undefined) product.sellingPrice = sellingPrice;
+if (costPrice !== undefined) product.costPrice = costPrice;
 
         const updateProduct = await product.save();
         return res.status(200).json({
@@ -91,7 +102,8 @@ export const updateProduct = async(req, res) => {
         });
     }catch(error){
         return res.status(500).json({
-            message: "Server Error"
+            message: "Server Error",
+            error: error.message
         })
     }
 }

@@ -10,9 +10,9 @@ router.route('/')
     .post(protect, addOrderItems);
 
 // Admin
-router.get('/admin', protect, getAllOrders);
-router.get('/admin/:id', protect, getAdminOrderById);
-router.put('/admin/:id/status', protect, updateOrderStatus);
+router.get('/admin', protect, adminOnly, getAllOrders);
+router.get('/admin/:id', protect, adminOnly, getAdminOrderById);
+router.put('/admin/:id/status', protect, adminOnly, updateOrderStatus);
 
 
 export default router;
