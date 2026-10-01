@@ -25,6 +25,8 @@ const orderSchema = new mongoose.Schema({
     isPaid: { type: Boolean, required: true, default: false },
     status: { type: String, default: "Pending" },
     paidAt: { type: Date },
+    razorpayOrderId: { type: String, },
+    razorpayPaymentId: { type: String, },
 }, {
     timestamps: true
 });
