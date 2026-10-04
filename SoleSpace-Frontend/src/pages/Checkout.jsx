@@ -160,35 +160,103 @@ export default function Checkout() {
           </div>
         </form>
       )}
+{step === 3 && (
+  <form onSubmit={next} className="space-y-5 border border-ink/15 p-6">
 
-      {step === 3 && (
-        <form onSubmit={next} className="space-y-4 border border-ink/15 p-6">
-          <p className="font-display text-xl mb-2">Payment method</p>
-          {[
-            { id: "upi", label: "UPI" },
-            { id: "card", label: "Credit / Debit card" },
-            { id: "netbanking", label: "Net banking" },
-            { id: "cod", label: "Cash on Delivery" },
-          ].map((o) => (
-            <label key={o.id} className={`flex items-center gap-3 border p-4 cursor-pointer ${payMethod === o.id ? "border-ink" : "border-ink/20"}`}>
-              <input type="radio" name="pay" checked={payMethod === o.id} onChange={() => setPayMethod(o.id)} className="accent-track" />
-              <span className="text-sm font-medium">{o.label}</span>
-            </label>
-          ))}
-          {payMethod === "card" && (
-            <div className="grid sm:grid-cols-2 gap-3 pt-2">
-              <input required placeholder="Card number" className="input sm:col-span-2" />
-              <input required placeholder="MM/YY" className="input" />
-              <input required placeholder="CVV" className="input" />
-            </div>
-          )}
-          <p className="text-xs text-graphite">Payments are verified server-side via gateway signature/webhook before an order is confirmed.</p>
-          <div className="flex gap-3 pt-2">
-            <button type="button" onClick={back} className="btn-outline flex-1">Back</button>
-            <button className="btn-primary flex-1">Review order</button>
+    <div>
+      <p className="font-display text-xl mb-1">Payment method</p>
+      <p className="text-sm text-graphite">
+        Choose your preferred payment method
+      </p>
+    </div>
+
+    <div className="space-y-2">
+     {[
+  { id: "upi", label: "UPI", sub: "Google Pay · PhonePe · Paytm", icon: "↯" },
+  { id: "card", label: "Credit / Debit Card", sub: "Visa · Mastercard · RuPay", icon: "▣" },
+  { id: "netbanking", label: "Net Banking", sub: "All major banks", icon: "⌂" },
+  { id: "cod", label: "Cash on Delivery", sub: "Pay when your order arrives", icon: "₹" },
+].map((o) => (
+        <label
+          key={o.id}
+          className={`flex items-center gap-4 p-4 border cursor-pointer transition ${
+            payMethod === o.id
+              ? "border-ink bg-white shadow-sm"
+              : "border-ink/10 hover:border-ink/30"
+          }`}
+        >
+        <div className="w-11 h-11 border border-ink/10 flex items-center justify-center">
+  {o.id === "upi" && <span className="text-sm font-bold text-green-600">UPI</span>}
+
+
+  {o.id === "card" && (
+   <svg className="text-blue-600" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 10h18" />
+    </svg>
+  )}
+
+  {o.id === "netbanking" && (
+   <svg className="text-purple-600" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M3 10h18L12 4 3 10Z" />
+      <path d="M5 10v7M9 10v7M15 10v7M19 10v7M3 19h18" />
+    </svg>
+  )}
+
+  {o.id === "cod" && (
+   <span className="text-lg font-semibold text-orange-500">₹</span>
+  )}
+</div>
+
+          <div className="flex-1">
+            <p className="text-sm font-semibold">{o.label}</p>
+            <p className="text-xs text-graphite mt-1">{o.sub}</p>
           </div>
-        </form>
-      )}
+
+          <input
+            type="radio"
+            name="pay"
+            checked={payMethod === o.id}
+            onChange={() => setPayMethod(o.id)}
+            className="accent-track w-4 h-4"
+          />
+        </label>
+      ))}
+    </div>
+
+    {payMethod === "card" && (
+      <div className="border border-ink/10 p-4 space-y-3 bg-white">
+        <p className="text-sm font-semibold">Card details</p>
+
+        <input required placeholder="Card number" className="input" />
+
+        <div className="grid grid-cols-2 gap-3">
+          <input required placeholder="MM / YY" className="input" />
+          <input required placeholder="CVV" className="input" />
+        </div>
+      </div>
+    )}
+
+    <div className="flex items-start gap-2 border-t border-ink/10 pt-4">
+      <span className="text-xs">🔒</span>
+   <p className="text-xs text-graphite font-medium">
+  Payments are securely verified before your order is confirmed.
+</p>
+    </div>
+
+    <div className="flex gap-3 pt-2">
+      <button type="button" onClick={back} className="btn-outline flex-1">
+        Back
+      </button>
+
+      <button type="submit" className="btn-primary flex-1">
+        Review order →
+      </button>
+    </div>
+
+  </form>
+)}
+   
 
       {step === 4 && (
         <div className="space-y-6">
