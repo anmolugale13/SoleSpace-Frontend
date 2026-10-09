@@ -25,56 +25,71 @@ export default function Login() {
 
   // Google login handler
 
+    // Google login handler
+useEffect(() => {
+  let initialized = false;
 
-  // Google login handler
-  useEffect(() => {
-    const initializeGoogle = () => {
-      if (!window.google) return;
+  const initializeGoogle = () => {
+  if (!window.google?.accounts?.id || initialized) return;
 
-      window.google.accounts.id.initialize({
-        client_id:
-          "177260318618-meoon79oknra9vs08rvoeq6us3226evk.apps.googleusercontent.com",
+  console.log("CURRENT ORIGIN:", window.location.origin);
 
-        callback: async (response) => {
-          try {
-            const result = await googleLogin(response.credential);
+  initialized = true;
 
-            if (!result.ok) {
-              throw new Error(result.message || "Google login failed");
-            }
 
-            push("Logged in successfully with Google");
-            navigate("/account");
-          } catch (error) {
-            console.error("Google Login Error:", error);
-            push(error.message || "Google login failed");
+    window.google.accounts.id.initialize({
+      client_id:
+        "177260318618-meoon79oknra9vs08rvoeq6us3226evk.apps.googleusercontent.com",
+
+      callback: async (response) => {
+        try {
+          if (!response.credential) {
+            throw new Error("Google credential not received");
           }
-        },
-      });
-    };
 
-    if (window.google) {
-      initializeGoogle();
-    } else {
-      const timer = setInterval(() => {
-        if (window.google) {
-          clearInterval(timer);
-          initializeGoogle();
+          const result = await googleLogin(response.credential);
+
+          if (!result?.ok) {
+            throw new Error(result?.message || "Google login failed");
+          }
+
+          push("Logged in successfully with Google");
+          navigate("/account");
+        } catch (error) {
+          console.error("Google Login Error:", error);
+          push(error.message || "Google login failed");
         }
-      }, 100);
-
-      return () => clearInterval(timer);
-    }
-  }, [navigate, push, googleLogin]);
-
-  const handleGoogleLogin = () => {
-    if (!window.google) {
-      push("Google login is not ready. Please try again.");
-      return;
-    }
-
-    window.google.accounts.id.prompt();
+      },
+    });
   };
+
+  initializeGoogle();
+
+  const timer = setInterval(() => {
+    if (window.google?.accounts?.id) {
+      initializeGoogle();
+      clearInterval(timer);
+    }
+  }, 300);
+
+  return () => clearInterval(timer);
+}, [googleLogin, navigate, push]);
+
+const handleGoogleLogin = () => {
+  if (!window.google?.accounts?.id) {
+    push("Google login is not ready. Please refresh the page.");
+    return;
+  }
+
+  window.google.accounts.id.prompt((notification) => {
+    if (notification.isNotDisplayed()) {
+      console.error(
+        "Google prompt not displayed:",
+        notification.getNotDisplayedReason()
+      );
+    }
+  });
+};
 
   const handleLogout = () => {
     logout();
